@@ -1,28 +1,26 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Stoper/>
+    <cookie-law theme="base">
+      <div slot-scope="props">
+        Ta strona używa ciasteczek (cookies), dzięki którym nasz serwis może działać lepiej. <a href="https://blog.wyremski.pl/polityka-prywatnosci/" target="_blank" title="Polityka prywatności serwisu" style="margin-right: 20px">Czytaj więcej</a>
+        <button class="btn btn-success" @click="props.accept"><span>Rozumiem i akceptuję</span></button>
+      </div>
+    </cookie-law>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import Stoper from './components/Stoper.vue'
+import CookieLaw from 'vue-cookie-law'
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    Stoper,
+    CookieLaw 
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 </style>

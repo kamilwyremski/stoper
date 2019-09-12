@@ -1,4 +1,7 @@
-# stoper
+# Stoper internetowy
+
+## Stoper internetowy stworzony w VUE w celach nauki
+### Projekt dostępny online pod adresem stoper.wyremski.pl
 
 ## Project setup
 ```
