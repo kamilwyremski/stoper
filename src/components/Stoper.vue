@@ -80,7 +80,7 @@
         data-ad-slot="9245472462">
       </Adsense>
       <footer class="text-center">
-        <p class="small"><a href="https://blog.wyremski.pl/polityka-prywatnosci/" target="_blank" title="Polityka prywatności serwisu">Polityka prywatności</a> | Project 2019 by <a href="http://wyremski.pl" target="_blank" title="Tworzenie Stron Internetowych">Kamil Wyremski</a></p>
+        <p class="small"><a href="https://blog.wyremski.pl/polityka-prywatnosci/" target="_blank" title="Polityka prywatności serwisu">Polityka prywatności</a> | Project 2019 - 2020 by <a href="http://wyremski.pl" target="_blank" title="Tworzenie Stron Internetowych">Kamil Wyremski</a></p>
       </footer>
     </div>
   </div>
@@ -368,5 +368,10 @@ export default {
 }
 #stoper_outside.contrast-dark .table{
   color: #e9e9e9;
+}
+@media(max-width: 576px) {
+  #stoper_outside{
+    padding: 0;
+  }
 }
 </style>
