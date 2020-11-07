@@ -64,10 +64,6 @@
           </table>
         </div>
       </div>
-      <Adsense
-        data-ad-client="ca-pub-7473594052398878"
-        data-ad-slot="9245472462">
-      </Adsense>
       <div id="stoper--description">
         <h4>Instrukcja używania stopera internetowego</h4>
         <p>Po kliknięciu niebieskiego przycisku z ikonką Start stoper rozpoczyna liczenie czasu z dokładnością do milisekundy (1/100 sekundy). Kliknięcie szarego przycisku z ikonką Pauza zatrzymuje liczenie czasu. Ponowne kiknięcie niebieskiego przycisku Start kontynuuje odliczanie. Kliknięcie żółtego przycisku z ikonką Międzyczas spowoduje dodanie międzyczasu. Pod stoperem wyświetla się lista międzyczasów: tabelka z informacją o różnicy czasu w międzyczasach oraz o całkowitym czasie. Kliknięcie czerwonego przycisku z ikonką Stop spowoduje zatrzymanie i wyzerowanie licznika czasu oraz skasowanie międzyczasów.</p>
@@ -75,10 +71,6 @@
         <p>Kliknięcie w strzałkę w górę zwiększa wielkość czcionki stopera a w dół - zmniejsza. Kliknięcie w przycisk z ikonką zmiany kontrastu zmnienia kolorystykę strony. Kliknięcie w przycisk z ikonką pełnego ekranu spowoduje wyświetlenie strony w pełnym ekranie. Zmiany te zostają zapisane i zachowane przy kolejnym otwarciu okna ze stoperem</p>
         <p>Projekt dostępny do pobrania na <a href="https://github.com/kamilwyremski/stoper" title="Stoper na VUE" target="_blank">https://github.com/kamilwyremski/stoper</a></p>
       </div>
-      <Adsense
-        data-ad-client="ca-pub-7473594052398878"
-        data-ad-slot="9245472462">
-      </Adsense>
       <footer class="text-center">
         <p class="small"><a href="https://blog.wyremski.pl/polityka-prywatnosci/" target="_blank" title="Polityka prywatności serwisu">Polityka prywatności</a> | Project 2019 - 2020 by <a href="http://wyremski.pl" target="_blank" title="Tworzenie Stron Internetowych">Kamil Wyremski</a></p>
       </footer>
