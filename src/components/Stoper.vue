@@ -72,7 +72,7 @@
         <p>Projekt dostępny do pobrania na <a href="https://github.com/kamilwyremski/stoper" title="Stoper na VUE" target="_blank">https://github.com/kamilwyremski/stoper</a></p>
       </div>
       <footer class="text-center">
-        <p class="small"><a href="https://blog.wyremski.pl/polityka-prywatnosci/" target="_blank" title="Polityka prywatności serwisu">Polityka prywatności</a> | Project 2019 - 2021 by <a href="http://wyremski.pl" target="_blank" title="Tworzenie Stron Internetowych">Kamil Wyremski</a></p>
+        <p class="small"><a href="https://blog.wyremski.pl/polityka-prywatnosci/" target="_blank" title="Polityka prywatności serwisu">Polityka prywatności</a> | Project 2019 - 2022 by <a href="http://wyremski.pl" target="_blank" title="Tworzenie Stron Internetowych">Kamil Wyremski</a></p>
       </footer>
     </div>
   </div>
