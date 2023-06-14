@@ -11,8 +11,8 @@
 </template>
 
 <script>
-import Stoper from './components/Stoper.vue'
-import CookieLaw from 'vue-cookie-law'
+import Stoper from './components/Stoper.vue';
+import CookieLaw from 'vue-cookie-law';
 export default {
   name: 'app',
   components: {
