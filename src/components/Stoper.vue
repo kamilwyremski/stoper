@@ -1,5 +1,5 @@
 <template>
-  <div id="stoper_outside" v-bind:class="{ 'contrast-dark': contrastDark }">
+  <div id="stoper_outside" v-bind:class="{ 'dark-mode': contrastDark }">
     <div class="container" id="stoper_box">
       <div class="text-center">
         <h1>Stoper online</h1>
@@ -50,17 +50,21 @@
           </button>
         </div>
         <div id="stoper--laps" v-if="laps.length">
-          <table class="table">
-            <tr>
-              <th>Runda</th>
-              <th>Czas</th>
-              <th>Łączny czas</th>
-            </tr>
-            <tr v-for="lap in laps" v-bind:key="lap.number">
-              <td>{{ lap.number }}</td>
-              <td>{{ lap.time }}</td>
-              <td>{{ lap.totalTime }}</td>
-            </tr>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">Runda</th>
+                <th scope="col">Czas</th>
+                <th scope="col">Łączny czas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="lap in laps" v-bind:key="lap.number">
+                <td>#{{ lap.number }}</td>
+                <td>{{ lap.time }}</td>
+                <td>{{ lap.totalTime }}</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -355,15 +359,16 @@ export default {
   background-color: #dfdfdf !important;
   padding: 40px 0;
 }
-#stoper_outside.contrast-dark {
+#stoper_outside.dark-mode {
   background-color: black !important;
   color: #e9e9e9;
 }
-#stoper_outside.contrast-dark #stoper_box {
+#stoper_outside.dark-mode #stoper_box {
   background-color: black !important;
 }
-#stoper_outside.contrast-dark .table {
+#stoper_outside.dark-mode .table > :not(caption) > * > *{
   color: #e9e9e9;
+  background-color: transparent;
 }
 @media (max-width: 576px) {
   #stoper_outside {

@@ -1,6 +1,6 @@
 {
   "name": "stoper",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": false,
   "license": "MIT",
   "scripts": {
@@ -9,12 +9,12 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.4.0",
-    "@fortawesome/free-solid-svg-icons": "^6.4.0",
+    "@fortawesome/fontawesome-svg-core": "^6.4.2",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/vue-fontawesome": "^2.0.10",
-    "bootstrap": "^4.5.2",
+    "bootstrap": "^5.3.2",
     "bootstrap-vue": "^2.16.0",
-    "core-js": "^3.6.5",
+    "core-js": "^3.32.2",
     "vue": "^2.6.12",
     "vue-cookie": "^1.1.4",
     "vue-cookie-law": "^1.13.3",
