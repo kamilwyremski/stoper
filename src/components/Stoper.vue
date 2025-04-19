@@ -1,5 +1,197 @@
+<script lang="ts">
+import { defineComponent, ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
+import Cookies from "js-cookie";
+
+type Lap = { number: number; time: string; totalTime: string };
+
+export default defineComponent({
+  name: "AppStoper",
+  setup() {
+    const stoperRun = ref(false);
+    const startTime = ref<number | null>(null);
+    const stopTime = ref<number | null>(null);
+    const timer = ref<number | null>(null);
+    const totalTime = ref(0);
+    const hours = ref(0);
+    const minutes = ref(0);
+    const seconds = ref(0);
+    const miliseconds = ref(0);
+    const laps = ref<Lap[]>([]);
+    const lapTime = ref(0);
+    const sizeFontStoper = ref(5);
+    const contrastDark = ref(false);
+
+    const startStoperBtn = ref<HTMLButtonElement | null>(null);
+    const stopStoperBtn = ref<HTMLButtonElement | null>(null);
+
+    const padTo2Digits = (num: number) => num.toString().padStart(2, "0");
+    const timeFormat = (time: number) => {
+      let sec = Math.floor(time / 1000);
+      let min = Math.floor(sec / 60);
+      let hr = Math.floor(min / 60);
+      sec %= 60;
+      min %= 60;
+      hr %= 24;
+      return `${padTo2Digits(hr)}:${padTo2Digits(min)}:${padTo2Digits(sec)}`;
+    };
+
+    function startStoper() {
+      stoperRun.value = true;
+      if (!startTime.value) startTime.value = Date.now();
+      if (startTime.value && stopTime.value) {
+        startTime.value = Date.now() - (stopTime.value - startTime.value);
+      }
+      timer.value = window.setInterval(() => {
+        totalTime.value = Date.now() - (startTime.value || 0);
+      }, 1);
+      nextTick(() => stopStoperBtn.value?.focus());
+    }
+
+    function stopStoper() {
+      if (timer.value) clearInterval(timer.value);
+      timer.value = null;
+      stopTime.value = Date.now();
+      nextTick(() => startStoperBtn.value?.focus());
+    }
+
+    function resetStoper() {
+      if (timer.value) clearInterval(timer.value);
+      timer.value = null;
+      stoperRun.value = false;
+      startTime.value = null;
+      stopTime.value = null;
+      totalTime.value = 0;
+      laps.value = [];
+      document.title = "Stoper online";
+    }
+
+    function addLap() {
+      lapTime.value = lapTime.value > totalTime.value ? 0 : lapTime.value;
+      laps.value.unshift({
+        number: laps.value.length + 1,
+        time: timeFormat(totalTime.value - lapTime.value),
+        totalTime: timeFormat(totalTime.value),
+      });
+      lapTime.value = totalTime.value;
+    }
+
+    function increaseFont() {
+      if (sizeFontStoper.value < 20) sizeFontStoper.value++;
+    }
+
+    function decreaseFont() {
+      if (sizeFontStoper.value > 1) sizeFontStoper.value--;
+    }
+
+    function changeContrast() {
+      contrastDark.value = !contrastDark.value;
+    }
+
+    function fullscreen() {
+      const elem = document.documentElement;
+      if (document.fullscreenElement) document.exitFullscreen?.();
+      else elem.requestFullscreen?.();
+    }
+
+    function leaving() {
+      if (stoperRun.value) {
+        Cookies.set("timer_enabled", String(!!timer.value), { expires: 30 });
+        Cookies.set("timer_stop_time", String(stopTime.value), { expires: 30 });
+        Cookies.set("timer_start_time", String(startTime.value), { expires: 30 });
+      } else {
+        Cookies.remove("timer_enabled");
+        Cookies.remove("timer_stop_time");
+        Cookies.remove("timer_start_time");
+      }
+      if (laps.value.length) Cookies.set("timer_laps", JSON.stringify(laps.value), { expires: 30 });
+      else Cookies.remove("timer_laps");
+      if (lapTime.value) Cookies.set("timer_lap_time", String(lapTime.value), { expires: 30 });
+      else Cookies.remove("timer_lap_time");
+      Cookies.set("timer_size_font_stoper", String(sizeFontStoper.value), { expires: 30 });
+      if (contrastDark.value) Cookies.set("timer_constrast_dark", "true", { expires: 30 });
+      else Cookies.remove("timer_constrast_dark");
+    }
+
+    onMounted(() => {
+      window.addEventListener("beforeunload", leaving);
+      const start = Cookies.get("timer_start_time");
+      if (start && +start > 0) {
+        stoperRun.value = true;
+        startTime.value = +start;
+        if (Cookies.get("timer_enabled") === "true") startStoper();
+        else {
+          const stop = Cookies.get("timer_stop_time");
+          stopTime.value = stop ? +stop : Date.now();
+          totalTime.value = (stopTime.value || 0) - (startTime.value || 0);
+        }
+        const lapsCookie = Cookies.get("timer_laps");
+        if (lapsCookie) {
+          try {
+            laps.value = JSON.parse(lapsCookie);
+          } catch {
+            laps.value = [];
+          }
+        }
+        const lapStr = Cookies.get("timer_lap_time");
+        if (lapStr && +lapStr > 0) lapTime.value = +lapStr;
+      }
+      const fontSize = Cookies.get("timer_size_font_stoper");
+      if (fontSize && +fontSize > 0 && +fontSize < 20) sizeFontStoper.value = +fontSize;
+      if (Cookies.get("timer_constrast_dark") === "true") changeContrast();
+    });
+
+    onBeforeUnmount(() => window.removeEventListener("beforeunload", leaving));
+
+    watch(totalTime, () => {
+      miliseconds.value = Math.floor((totalTime.value / 10) % 100);
+      hours.value = Math.floor(totalTime.value / 3600000);
+      minutes.value = Math.floor((totalTime.value / 60000) % 60);
+      seconds.value = Math.floor((totalTime.value / 1000) % 60);
+    });
+
+    watch(seconds, () => {
+      document.title = `${t_hours.value}${t_minutes.value}:${t_seconds.value} - Stoper online`;
+    });
+
+    const t_miliseconds = computed(() => padTo2Digits(miliseconds.value));
+    const t_seconds = computed(() => padTo2Digits(seconds.value));
+    const t_minutes = computed(() => padTo2Digits(minutes.value));
+    const t_hours = computed(() => (hours.value === 0 ? "" : `${hours.value}:`));
+
+    return {
+      // state
+      stoperRun,
+      totalTime,
+      startTime,
+      stopTime,
+
+      timer,
+      laps,
+      sizeFontStoper,
+      contrastDark,
+      t_miliseconds,
+      t_seconds,
+      t_minutes,
+      t_hours,
+      // refs
+      startStoperBtn,
+      stopStoperBtn,
+      // methods
+      startStoper,
+      stopStoper,
+      resetStoper,
+      addLap,
+      increaseFont,
+      decreaseFont,
+      changeContrast,
+      fullscreen,
+    };
+  },
+});
+</script>
+
 <template>
-  <div id="stoper_outside" v-bind:class="{ 'dark-mode': contrastDark }">
+  <div id="stoper_outside" :class="{ 'dark-mode': contrastDark }">
     <div class="container" id="stoper_box">
       <div class="text-center">
         <h1>Stoper online</h1>
@@ -17,29 +209,14 @@
             <font-awesome-icon icon="arrows-alt" />
           </button>
         </div>
-        <div
-          id="stoper_digits"
-          v-bind:style="{ fontSize: sizeFontStoper + 'em' }"
-        >
-          {{ t_hours }}{{ t_minutes }}:{{ t_seconds
-          }}<small>.{{ t_miliseconds }}</small>
+        <div id="stoper_digits" :style="{ fontSize: sizeFontStoper + 'em' }">
+          {{ t_hours }}{{ t_minutes }}:{{ t_seconds }}<small>.{{ t_miliseconds }}</small>
         </div>
         <div id="stoper--buttons">
-          <button
-            ref="startStoper"
-            class="btn btn-primary"
-            v-if="!timer"
-            @click="startStoper"
-            autofocus
-          >
+          <button ref="startStoperBtn" class="btn btn-primary" v-if="!timer" @click="startStoper">
             <font-awesome-icon icon="play-circle" />
           </button>
-          <button
-            ref="stopStoper"
-            class="btn btn-secondary"
-            v-if="timer"
-            @click="stopStoper"
-          >
+          <button ref="stopStoperBtn" class="btn btn-secondary" v-if="timer" @click="stopStoper">
             <font-awesome-icon icon="pause-circle" />
           </button>
           <button class="btn btn-warning" v-if="timer" @click="addLap">
@@ -59,7 +236,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="lap in laps" v-bind:key="lap.number">
+              <tr v-for="lap in laps" :key="lap.number">
                 <td>#{{ lap.number }}</td>
                 <td>{{ lap.time }}</td>
                 <td>{{ lap.totalTime }}</td>
@@ -71,33 +248,27 @@
       <div id="stoper--description">
         <h4>Instrukcja używania stopera internetowego</h4>
         <p>
-          Po kliknięciu niebieskiego przycisku z ikonką Start stoper rozpoczyna
-          liczenie czasu z dokładnością do milisekundy (1/100 sekundy).
-          Kliknięcie szarego przycisku z ikonką Pauza zatrzymuje liczenie czasu.
-          Ponowne kiknięcie niebieskiego przycisku Start kontynuuje odliczanie.
-          Kliknięcie żółtego przycisku z ikonką Międzyczas spowoduje dodanie
-          międzyczasu. Pod stoperem wyświetla się lista międzyczasów: tabelka z
-          informacją o różnicy czasu w międzyczasach oraz o całkowitym czasie.
-          Kliknięcie czerwonego przycisku z ikonką Stop spowoduje zatrzymanie i
-          wyzerowanie licznika czasu oraz skasowanie międzyczasów.
+          Po kliknięciu niebieskiego przycisku z ikonką Start stoper rozpoczyna liczenie czasu z
+          dokładnością do milisekundy (1/100 sekundy). Kliknięcie szarego przycisku z ikonką Pauza
+          zatrzymuje liczenie czasu. Ponowne kliknięcie niebieskiego przycisku Start kontynuuje
+          odliczanie. Kliknięcie żółtego przycisku z ikonką Międzyczas spowoduje dodanie
+          międzyczasu. Pod stoperem wyświetla się lista międzyczasów: tabelka z informacją o różnicy
+          czasu w międzyczasach oraz o całkowitym czasie. Kliknięcie czerwonego przycisku z ikonką
+          Stop spowoduje zatrzymanie i wyzerowanie licznika czasu oraz skasowanie międzyczasów.
         </p>
         <p>
-          Obecny czas i międzyczasy są zapisywane w ciasteczkach, dzięki czemu
-          po ponownym wejściu na stronę liczenie będzie kontynuowane.
+          Obecny czas i międzyczasy są zapisywane w ciasteczkach, dzięki czemu po ponownym wejściu
+          na stronę liczenie będzie kontynuowane.
         </p>
         <p>
-          Kliknięcie w strzałkę w górę zwiększa wielkość czcionki stopera a w
-          dół - zmniejsza. Kliknięcie w przycisk z ikonką zmiany kontrastu
-          zmnienia kolorystykę strony. Kliknięcie w przycisk z ikonką pełnego
-          ekranu spowoduje wyświetlenie strony w pełnym ekranie. Zmiany te
+          Kliknięcie w strzałkę w górę zwiększa wielkość czcionki stopera a w dół - zmniejsza.
+          Kliknięcie w przycisk z ikonką zmiany kontrastu zmienia kolorystykę strony. Kliknięcie w
+          przycisk z ikonką pełnego ekranu spowoduje wyświetlenie strony w pełnym ekranie. Zmiany te
           zostają zapisane i zachowane przy kolejnym otwarciu okna ze stoperem
         </p>
         <p>
           Projekt dostępny do pobrania na
-          <a
-            href="https://github.com/kamilwyremski/stoper"
-            title="Stoper na VUE"
-            target="_blank"
+          <a href="https://github.com/kamilwyremski/stoper" title="Stoper na VUE" target="_blank"
             >https://github.com/kamilwyremski/stoper</a
           >
         </p>
@@ -110,11 +281,8 @@
             title="Polityka prywatności serwisu"
             >Polityka prywatności</a
           >
-          | Project 2019 - 2023 by
-          <a
-            href="http://wyremski.pl"
-            target="_blank"
-            title="Tworzenie Stron Internetowych"
+          | Project 2019 - 2025 by
+          <a href="http://wyremski.pl" target="_blank" title="Tworzenie Stron Internetowych"
             >Kamil Wyremski</a
           >
         </p>
@@ -122,211 +290,6 @@
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: "Stoper",
-  data: function () {
-    return {
-      stoperRun: false,
-      startTime: null,
-      stopTime: null,
-      timer: null,
-      totalTime: 0,
-      hours: 0,
-      minutes: 0,
-      seconds: 0,
-      miliseconds: 0,
-      laps: [],
-      lapTime: 0,
-      sizeFontStoper: 5,
-      contrastDark: false,
-    };
-  },
-  mounted: function () {
-    window.addEventListener("beforeunload", this.leaving);
-    if (this.$cookie.get("timer_start_time") > 0) {
-      this.stoperRun = true;
-      this.startTime = this.$cookie.get("timer_start_time");
-      if (this.$cookie.get("timer_enabled") == "true") {
-        this.startStoper();
-      }else{
-        this.stopTime = this.$cookie.get("timer_stop_time") || (new Date()).getTime();
-        this.totalTime = this.stopTime - this.startTime;
-      }      
-      if (this.$cookie.get("timer_laps")) {
-        try {
-          this.laps = JSON.parse(this.$cookie.get("timer_laps"));
-        } catch (e) {
-          this.laps = [];
-        }
-        if (this.$cookie.get("timer_lap_time") > 0) {
-          this.lapTime = this.$cookie.get("timer_lap_time");
-        }
-      }
-    }
-    if (
-      this.$cookie.get("timer_size_font_stoper") > 0 &&
-      this.$cookie.get("timer_size_font_stoper") < 20
-    ) {
-      this.sizeFontStoper = this.$cookie.get("timer_size_font_stoper");
-    }
-    if (this.$cookie.get("timer_constrast_dark") == "true") {
-      this.changeContrast();
-    }
-  },
-  methods: {
-    startStoper: function () {
-      this.stoperRun = true;
-      if(!this.startTime){
-        this.startTime = (new Date()).getTime();
-      }
-      if(this.startTime && this.stopTime){
-        this.startTime = (new Date()).getTime() - (this.stopTime - this.startTime);
-      }
-      this.timer = setInterval(() => this.countdown(), 1);
-      this.$nextTick(() => this.$refs.stopStoper.focus());
-    },
-    stopStoper: function () {
-      clearInterval(this.timer);
-      this.timer = null;
-      this.stopTime = (new Date()).getTime();
-      this.$nextTick(() => this.$refs.startStoper.focus());
-    },
-    resetStoper: function () {
-      clearInterval(this.timer);
-      this.timer = null;
-      this.stoperRun = false;
-      this.startTime = null;
-      this.stopTime = null;
-      this.totalTime = 0;
-      this.laps = [];
-      document.title = "Stoper online";
-    },
-    countdown: function () {
-      this.totalTime = this.startTime ? (new Date()).getTime() - this.startTime : 0;
-    },
-    padTo2Digits: (num) => num.toString().padStart(2, '0'),
-    timeFormat: function (time) {
-      let seconds = Math.floor(time / 1000);
-      let minutes = Math.floor(seconds / 60);
-      let hours = Math.floor(minutes / 60);
-      seconds = seconds % 60;
-      minutes = minutes % 60;
-      hours = hours % 24;
-      return `${this.padTo2Digits(hours)}:${this.padTo2Digits(minutes)}:${this.padTo2Digits(
-        seconds,
-      )}`;
-    },
-    addLap: function () {
-      this.lapTime = this.lapTime > this.totalTime ? 0 : this.lapTime
-      this.laps.unshift({
-        number: this.laps.length + 1,
-        time: this.timeFormat(this.totalTime - this.lapTime),
-        totalTime: this.timeFormat(this.totalTime),
-      });
-      this.lapTime = this.totalTime;
-    },
-    increaseFont: function () {
-      if (this.sizeFontStoper < 20) {
-        this.sizeFontStoper++;
-      }
-    },
-    decreaseFont: function () {
-      if (this.sizeFontStoper > 1) {
-        this.sizeFontStoper--;
-      }
-    },
-    changeContrast: function () {
-      this.contrastDark = !this.contrastDark;
-    },
-    fullscreen: function () {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.mozCancelFullScreen) {
-        /* Firefox */
-        document.mozCancelFullScreen();
-      } else if (document.webkitExitFullscreen) {
-        /* Chrome, Safari and Opera */
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
-        /* IE/Edge */
-        document.msExitFullscreen();
-      }
-      let elem = document.documentElement;
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.mozRequestFullScreen) {
-        /* Firefox */
-        elem.mozRequestFullScreen();
-      } else if (elem.webkitRequestFullscreen) {
-        /* Chrome, Safari and Opera */
-        elem.webkitRequestFullscreen();
-      } else if (elem.msRequestFullscreen) {
-        /* IE/Edge */
-        elem.msRequestFullscreen();
-      }
-    },
-    leaving: function () {
-      if (this.stoperRun) {
-        this.$cookie.set("timer_enabled", !!this.timer, 30);
-        this.$cookie.set("timer_stop_time", this.stopTime, 30);
-        this.$cookie.set("timer_start_time", this.startTime, 30);
-      } else {
-        this.$cookie.delete("timer_enabled");
-        this.$cookie.delete("timer_stop_time");
-        this.$cookie.delete("timer_start_time");
-      }
-      if (this.laps) {
-        this.$cookie.set("timer_laps", JSON.stringify(this.laps), 30);
-      } else {
-        this.$cookie.delete("timer_laps");
-      }
-      if (this.lapTime) {
-        this.$cookie.set("timer_lap_time", this.lapTime, 30);
-      } else {
-        this.$cookie.delete("timer_lap_time");
-      }
-      this.$cookie.set("timer_size_font_stoper", this.sizeFontStoper, 30);
-      if (this.contrastDark) {
-        this.$cookie.set("timer_constrast_dark", true, 30);
-      } else {
-        this.$cookie.delete("timer_constrast_dark");
-      }
-    },
-  },
-  computed: {
-    t_miliseconds: function () {
-      return this.padTo2Digits(this.miliseconds);
-    },
-    t_seconds: function () {
-      return this.padTo2Digits(this.seconds);
-    },
-    t_minutes: function () {
-      return this.padTo2Digits(this.minutes);
-    },
-    t_hours: function () {
-      return this.hours == 0 ? "" : this.hours + ":";
-    },
-  },
-  watch: {
-    totalTime: function () {
-      this.miliseconds = Math.floor((this.totalTime / 10) % 100);
-      this.hours = Math.floor((this.totalTime / 1000) / (60 * 60));
-      this.minutes = Math.floor(((this.totalTime / 1000) / 60) - (this.hours * 60));
-      this.seconds = Math.floor((this.totalTime / 1000) - (this.hours * 60 * 60) - (this.minutes * 60));      
-    },
-    seconds: function () {
-      document.title =
-        this.t_hours +
-        this.t_minutes +
-        ":" +
-        this.t_seconds +
-        " - Stoper online";
-    },
-  },
-};
-</script>
 
 <style scoped>
 #stoper_box {
@@ -366,7 +329,7 @@ export default {
 #stoper_outside.dark-mode #stoper_box {
   background-color: black !important;
 }
-#stoper_outside.dark-mode .table > :not(caption) > * > *{
+#stoper_outside.dark-mode .table > :not(caption) > * > * {
   color: #e9e9e9;
   background-color: transparent;
 }
