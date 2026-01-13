@@ -281,7 +281,7 @@ export default defineComponent({
             title="Polityka prywatności serwisu"
             >Polityka prywatności</a
           >
-          | Project 2019 - 2025 by
+          | Project 2019 - 2026 by
           <a href="http://wyremski.pl" target="_blank" title="Tworzenie Stron Internetowych"
             >Kamil Wyremski</a
           >
@@ -321,6 +321,7 @@ export default defineComponent({
 #stoper_outside {
   background-color: #dfdfdf !important;
   padding: 40px 0;
+  min-height: 100vh;
 }
 #stoper_outside.dark-mode {
   background-color: black !important;
